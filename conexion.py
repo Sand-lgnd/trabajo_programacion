@@ -180,6 +180,81 @@ def get_products_in_environment(environment_id: str) -> List[Tuple[Any, ...]]:
         return [] # Return empty list as per requirement
     return results # Return the list of results (can be empty if no matching data)
 
+def get_damaged_device_count() -> int:
+    """Counts the number of products that are of type 'DISPOSITIVO' and state 'DAÑADO'.
+
+    This function constructs and executes a SQL query to count rows in the
+    'producto' table matching these criteria.
+
+    :return: The total count of damaged devices as an integer. Returns 0 if
+             no damaged devices are found or if an error occurs during the
+             database query.
+    :rtype: int
+    """
+    sql_query = "SELECT COUNT(*) FROM producto WHERE tipo = 'DISPOSITIVO' AND estado = 'DAÑADO';"
+    results = execute_query(sql_query)
+
+    if results and results[0] and results[0][0] is not None:
+        return int(results[0][0])
+    return 0 # Return 0 if query fails, or no results, or count is None
+
+def get_entries_on_date(specific_date: str) -> int:
+    """Counts the number of 'ENTRADA' movements on a specific date.
+
+    Constructs and executes a SQL query to count rows in 'movimiento_kardex'
+    where 'tipo_movimiento' is 'ENTRADA' and 'fecha' matches the given date.
+
+    :param specific_date: The specific date to count entries for, in 'YYYY-MM-DD' format.
+    :type specific_date: str
+    :return: The total count of entries on that date as an integer. Returns 0
+             if no entries are found on that date or if an error occurs
+             during the database query.
+    :rtype: int
+    """
+    sql_query = "SELECT COUNT(*) FROM movimiento_kardex WHERE tipo_movimiento = 'ENTRADA' AND fecha = %s;"
+    results = execute_query(sql_query, params=(specific_date,))
+
+    if results and results[0] and results[0][0] is not None:
+        return int(results[0][0])
+    return 0 # Return 0 if query fails, or no results, or count is None
+
+def get_total_sim_card_count() -> int:
+    """Counts the total number of products that are of type 'SIM'.
+
+    Constructs and executes a SQL query to count rows in the 'producto' table
+    where 'tipo' is 'SIM'.
+
+    :return: The total count of SIM cards as an integer. Returns 0 if no SIM
+             cards are found or if an error occurs during the database query.
+    :rtype: int
+    """
+    sql_query = "SELECT COUNT(*) FROM producto WHERE tipo = 'SIM';"
+    results = execute_query(sql_query)
+
+    if results and results[0] and results[0][0] is not None:
+        return int(results[0][0])
+    return 0 # Return 0 if query fails, or no results, or count is None
+
+def get_sim_card_count_by_operator(operator_name: str) -> int:
+    """Counts the number of SIM card products for a specific operator.
+
+    Constructs and executes a SQL query to count rows in the 'producto' table
+    where 'tipo' is 'SIM' and 'operador' matches the given operator_name.
+
+    :param operator_name: The name of the operator to filter SIM cards by.
+    :type operator_name: str
+    :return: The total count of SIM cards for the specified operator as an
+             integer. Returns 0 if no SIM cards are found for that operator
+             or if an error occurs during the database query.
+    :rtype: int
+    """
+    sql_query = "SELECT COUNT(*) FROM producto WHERE tipo = 'SIM' AND operador = %s;"
+    results = execute_query(sql_query, params=(operator_name,))
+
+    if results and results[0] and results[0][0] is not None:
+        return int(results[0][0])
+    return 0 # Return 0 if query fails, or no results, or count is None
+
 if __name__ == "__main__":
     # print("Attempting to execute query...")
     # # Example usage:
@@ -295,6 +370,41 @@ if __name__ == "__main__":
     elif products_in_env == []: # Explicitly check for empty list (no data or error handled by returning [])
         print(f"No products found in environment {environment_id_to_check} (or an error occurred during retrieval).")
     # No 'else' needed here.
+    print("-" * 20)
+
+    # --- Test get_damaged_device_count ---
+    print("\n" + "-" * 20)
+    print("Testing get_damaged_device_count...")
+    damaged_devices = get_damaged_device_count()
+    # This function returns 0 on error or if none found, so direct printing is fine.
+    # Error messages would have been printed by execute_query or get_db_connection.
+    print(f"Number of damaged devices: {damaged_devices}")
+    print("-" * 20)
+
+    # --- Test get_entries_on_date ---
+    print("\n" + "-" * 20)
+    date_to_check = '2025-02-01'
+    print(f"Testing get_entries_on_date (for {date_to_check})...")
+    entries_count = get_entries_on_date(date_to_check)
+    # This function returns 0 on error or if none found.
+    print(f"Number of entries on {date_to_check}: {entries_count}")
+    print("-" * 20)
+
+    # --- Test get_total_sim_card_count ---
+    print("\n" + "-" * 20)
+    print("Testing get_total_sim_card_count...")
+    sim_card_count = get_total_sim_card_count()
+    # This function returns 0 on error or if none found.
+    print(f"Total number of SIM cards: {sim_card_count}")
+    print("-" * 20)
+
+    # --- Test get_sim_card_count_by_operator ---
+    print("\n" + "-" * 20)
+    operator_to_check = 'Entel'
+    print(f"Testing get_sim_card_count_by_operator (for {operator_to_check})...")
+    sim_count_operator = get_sim_card_count_by_operator(operator_to_check)
+    # This function returns 0 on error or if none found.
+    print(f"Number of SIM cards for operator {operator_to_check}: {sim_count_operator}")
     print("-" * 20)
 
     print("\n--- All example function calls completed ---")
