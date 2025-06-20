@@ -58,7 +58,7 @@ def obtener_stock(product_id: str) -> int:
 
 def producto_entorno(id_entorno: str) -> List[Tuple[Any, ...]]:
     query = """
-    SELECT DISTINCT id_producto 
+    SELECT DISTINCT id_producto,  
     FROM movimiento_kardex 
     WHERE id_entorno = %s;
     """
@@ -118,6 +118,7 @@ def obtener_stock_todos_productos() -> List[Tuple[str, str, int]]:
         
     return stock_total
 
+
 if __name__ == "__main__":
     while True:
         print("\n--- MENÚ PRINCIPAL ---")
@@ -175,7 +176,7 @@ if __name__ == "__main__":
             # No salimos del bucle para permitir más intentos
             continue  # Aseguramos que se pida la opción de continuar
         
-        continuar = input("¿Desea realizar más consultas? (s/n): ")
+        continuar = input("¿Desea realizar más consultas? (s para si o cualquier letra para no): ")
         if continuar.lower() != "s":
             print("Gracias por usar el programa :)")
             break
