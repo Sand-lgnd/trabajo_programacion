@@ -95,6 +95,27 @@ def obtener_sim_de_operador(operator_name: str) -> int:
         return int(resultado[0][0])
     return 0
 
+def salidas_en_un_dia(specific_date: str) -> int:
+    sql_query = "SELECT COUNT(*) FROM movimiento_kardex WHERE tipo_movimiento = 'SALIDA' AND fecha = %s;"
+    resultado = ejecutar_query(sql_query, params=(specific_date,))
+    if resultado and resultado[0] and resultado[0][0] is not None:
+        return int(resultado[0][0])
+    return 0
+
+def obtener_stock_todos_productos() -> List[Tuple[str, str, int]]:
+    query_productos = "SELECT id_producto, nombre FROM producto;"
+    productos = ejecutar_query(query_productos)
+
+    if not productos:
+        return []
+
+    stock_total = []
+    for id_producto, nombre_producto in productos:
+        stock = obtener_stock(id_producto)
+        stock_total.append((id_producto, nombre_producto, stock))
+
+    return stock_total
+
 if __name__ == "__main__":
     while True:
         print("\n--- MENÚ PRINCIPAL ---")
@@ -105,7 +126,9 @@ if __name__ == "__main__":
         print("5. Contar entradas en una fecha específica")
         print("6. Contar SIM cards totales")
         print("7. Contar SIM cards por operador")
-        opcion = input("Seleccione una opción (1-7): ")
+        print("8. Consultar salidas de un día específico")
+        print("9. Ver stock actual de todos los productos")
+        opcion = input("Seleccione una opción (1-9): ")
         if opcion == "1":
             pid = input("Ingrese ID del producto: ")
             resultado = obtener_detalles_producto(pid)
@@ -133,12 +156,24 @@ if __name__ == "__main__":
             operador = input("Ingrese nombre del operador: ")
             cantidad = obtener_sim_de_operador(operador)
             print(f"SIMs de {operador}: {cantidad}")
+        elif opcion == "8":
+            fecha = input("Ingrese la fecha (YYYY-MM-DD): ")
+            salidas = salidas_en_un_dia(fecha)
+            print(f"Salidas en {fecha}: {salidas}")
+        elif opcion == "9":
+            stock_productos = obtener_stock_todos_productos()
+            if stock_productos:
+                print("\n--- STOCK DE TODOS LOS PRODUCTOS ---")
+                for id_p, nombre_p, stock_p in stock_productos:
+                    print(f"ID: {id_p}, Nombre: {nombre_p}, Stock: {stock_p}")
+            else:
+                print("No se pudo obtener el stock de los productos.")
         else:
             print("Opción no válida. Intente nuevamente.")
-            break
-        continuar= input("¿Desea realizar más consultas? s/n: ")
-        if continuar.lower()== "s":
-            print("Entendido.")
-        else:
+            # No salimos del bucle para permitir más intentos
+            continue  # Aseguramos que se pida la opción de continuar
+
+        continuar = input("¿Desea realizar más consultas? (s/n): ")
+        if continuar.lower() != "s":
             print("Gracias por usar el programa :)")
             break
