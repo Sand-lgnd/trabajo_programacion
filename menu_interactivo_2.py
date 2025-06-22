@@ -95,7 +95,8 @@ def obtener_sim_total() -> int:
         return int(resultado[0][0])
     return 0
 
-def obtener_sim_de_operador(operator_name: str) -> int:
+def obtener_sim_de_operador(operator_name: str
+                            ) -> int:
     sql_query = "SELECT COUNT(*) FROM producto WHERE tipo = 'SIM' AND operador = %s;"
     resultado = ejecutar_query(sql_query, params=(operator_name,))
     if resultado and resultado[0] and resultado[0][0] is not None:
