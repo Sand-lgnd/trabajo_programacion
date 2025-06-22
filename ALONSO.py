@@ -1,5 +1,6 @@
 import mysql.connector
-import getpass 
+import getpass
+import bcrypt
 
 DB_CONFIG = {
     'host': 'localhost',
@@ -96,7 +97,7 @@ def seed_initial_data():
         cursor.execute("SELECT id FROM usuarios WHERE alias = 'alonso' LIMIT 1;")
         if not cursor.fetchone():
             admin_pass = getpass.getpass("Ingrese la contraseña para el usuario 'alonso': ")
-            hashed_password = bcrypt.hashpw(admin_pass.encode('1234'), bcrypt.gensalt()).decode('1234')
+            hashed_password = bcrypt.hashpw(admin_pass.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             cursor.execute(
                 "INSERT INTO usuarios (alias, rol, password_hash) VALUES (%s, %s, %s)",
                 ('alonso', 'encargado', hashed_password)
@@ -203,7 +204,7 @@ def seed_initial_data():
             print("Conexión a la base de datos cerrada.")
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     create_tables()
     seed_initial_data()
     print("\nProceso de configuracion de la base de datos acabado.")
