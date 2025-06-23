@@ -26,22 +26,25 @@ CREATE TABLE producto (
 	nombre VARCHAR(260)
 );
 CREATE TABLE lote (
-    id_lote VARCHAR(12) PRIMARY KEY NOT NULL,
-    id_producto VARCHAR(8) FOREIGN KEY (id_producto) REFERENCES producto(id_producto) not null,
+    id_lote VARCHAR(50) NOT NULL,  -- Código de lote del proveedor
+    id_producto VARCHAR(8) NOT NULL,
     fecha_vencimiento DATE,
-    fecha_ingreso DATE ,
-    cantidad INT ,
+    fecha_ingreso DATE,
+    PRIMARY KEY (id_lote, id_producto),
+    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 use BD_proyecto
 CREATE TABLE movimiento_kardex (
     num_movimiento varchar(8) PRIMARY KEY not null,
     fecha DATE,
     tipo_movimiento ENUM('ENTRADA', 'SALIDA', 'DEVOLUCION', 'MANTENIMIENTO') ,
-    id_producto VARCHAR(8) FOREIGN KEY (id_producto) REFERENCES producto(id_producto) NOT NULL,
+    id_producto VARCHAR(8) NOT NULL,
     cantidad INT ,
-    id_entorno VARCHAR(12) FOREIGN KEY (id_entorno) REFERENCES entorno_almacenamiento(id_entorno) NOT NULL ,
+    id_entorno VARCHAR(12) NOT NULL REFERENCES entorno_almacenamiento(id_entorno) ,
     estado_post_movimiento ENUM('NUEVO', 'ACTIVO', 'USADO', 'REACONDICIONADO', 'DAÑADO'),
-    id_lote varchar(12) FOREIGN KEY (id_lote) REFERENCES lote(id_lote) not null, 
+    id_lote VARCHAR(50) NOT NULL,
+    FOREIGN KEY (id_lote, id_producto) REFERENCES lote(id_lote, id_producto),
+    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
 use BD_proyecto
@@ -64,13 +67,13 @@ INSERT INTO entorno_almacenamiento (id_entorno, nombre, ubicacion_fisica, temper
 ('ENT-A1', 'Reparaciones', 'Sótano', null, null, null, null, 'NO');
 
 use BD_proyecto;
-INSERT INTO lote (id_lote, id_producto, fecha_vencimiento, fecha_ingreso, cantidad)
+INSERT INTO lote (id_lote, id_producto, fecha_vencimiento, fecha_ingreso)
 VALUES 
-('L20250201A3F', 'DS0001', '2025-12-15', '2025-02-01', 100),
-('L202501109CE', 'DS0006', '2025-09-21', '2025-01-10', 50),
-('L20250105E19', 'TR0002', '2025-12-21', '2025-01-05', 75),
-('L202502127BD', 'DS0002', '2025-11-20', '2025-02-12', 200),
-('L2025062127A', 'TR0004', '2026-04-21', '2025-06-21', 60);
+('L20250201A3F', 'DS0001', '2025-12-15', '2025-02-01'),
+('L202501109CE', 'DS0006', '2025-09-21', '2025-01-10'),
+('L20250105E19', 'TR0002', '2025-12-21', '2025-01-05'),
+('L202502127BD', 'DS0002', '2025-11-20', '2025-02-12'),
+('L2025062127A', 'TR0004', '2026-04-21', '2025-06-21');
 
 use BD_proyecto;
 INSERT INTO movimiento_kardex (num_movimiento, fecha, tipo_movimiento, id_producto, cantidad, id_entorno, estado_post_movimiento, id_lote) VALUES
