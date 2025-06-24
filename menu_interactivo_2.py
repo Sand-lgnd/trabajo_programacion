@@ -1,38 +1,65 @@
 import mysql.connector
 from typing import List, Tuple, Any, Optional
 
+# Variables globales para la información de conexión (modificables si es necesario)
+DB_HOST = "localhost"
+DB_USER = "root"
+DB_PASSWORD = "Pata2021."
+DB_NAME = "BD_proyecto"
+
+class DatabaseError(Exception):
+    """Excepción personalizada para errores de base de datos."""
+    pass
+
 def conexion_BD():
+    """Establece la conexión con la base de datos."""
     try:
         conexion = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Pata2021.",
-            database="BD_proyecto"
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
         )
         return conexion
     except mysql.connector.Error as err:
-        print(f"Conexión con la BD fallida: {err}")
-        return None
+        # En lugar de imprimir, lanzamos una excepción que la GUI puede capturar
+        raise DatabaseError(f"Conexión con la BD fallida: {err}")
 
 def ejecutar_query(query_string: str, params: Optional[tuple] = None) -> Optional[List[Tuple[Any, ...]]]:
+    """Ejecuta una consulta SQL y devuelve los resultados.
+    Lanza DatabaseError en caso de problemas.
+    """
     conexion = None
     try:
         conexion = conexion_BD()
-        if conexion is None:
-            return None
+        # No es necesario verificar si conexion es None aquí,
+        # ya que conexion_BD() lanzará una excepción si falla.
 
         cursor = conexion.cursor()
         cursor.execute(query_string, params)
         results = cursor.fetchall()
+        # Para operaciones que no devuelven resultados (INSERT, UPDATE, DELETE),
+        # fetchall() devuelve una lista vacía.
+        # Si es una operación como COMMIT o ROLLBACK, puede no haber resultados.
+        # Para SELECT, devuelve las filas.
+
+        # Si la query es de modificación (INSERT, UPDATE, DELETE), necesitamos hacer commit.
+        # Esto es una simplificación; idealmente, se manejaría de forma más explícita.
+        if query_string.strip().upper().startswith(("INSERT", "UPDATE", "DELETE")):
+            conexion.commit()
+            # Para estas operaciones, podríamos querer devolver el número de filas afectadas.
+            # return cursor.rowcount
+            # Por ahora, mantenemos la consistencia devolviendo None o lista vacía si no es SELECT.
+
         return results
     except mysql.connector.Error as err:
-        print(f"Error al ejecutar el query: {err}\nQuery: {query_string}\nParams: {params}")
-        return None
+        # En lugar de imprimir, lanzamos una excepción
+        raise DatabaseError(f"Error al ejecutar el query: {err}\nQuery: {query_string}\nParams: {params}")
     finally:
         if conexion and conexion.is_connected():
             cursor.close()
             conexion.close()
-            print("Conexión cerrada.")
+            # print("Conexión cerrada.") # Mejor no imprimir esto aquí para la GUI
 
 def obtener_detalles_producto(product_id: str) -> Optional[Tuple[Any, ...]]:
     query = "SELECT * FROM producto WHERE id_producto = %s"
