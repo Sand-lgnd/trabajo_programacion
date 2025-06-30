@@ -7,7 +7,7 @@ def conexion_BD():
             host="localhost",
             user="root",
             password="Pata2021.",
-            database="BD_proyecto"
+            database="BD_proyecto_2"
         )
         return conexion
     except mysql.connector.Error as err:
